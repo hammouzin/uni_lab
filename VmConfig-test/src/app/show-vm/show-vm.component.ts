@@ -2,9 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ConsoleService } from '../services/console.service';
 
-// declare global RFB provided via CDN
-declare var RFB: any;
-
 @Component({
   selector: 'app-show-vm',
   standalone: false,
@@ -65,6 +62,40 @@ export class ShowVMComponent implements OnInit {
       .replace(/[^a-z0-9_-]+/g, '-');
   }
 
+  private ensureRfbAvailable(): Promise<any> {
+    const globalAny = window as any;
+    if (globalAny.RFB) return Promise.resolve(globalAny.RFB);
+
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-novnc-loader="true"]') as HTMLScriptElement | null;
+      if (existing) {
+        const check = () => {
+          if ((window as any).RFB) resolve((window as any).RFB);
+          else setTimeout(check, 50);
+        };
+        check();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.dataset['novncLoader'] = 'true';
+      script.textContent = "import RFB from 'https://unpkg.com/@novnc/novnc/core/rfb.js'; window.RFB = RFB;";
+      script.onload = () => resolve((window as any).RFB);
+      script.onerror = (e) => reject(e);
+      document.head.appendChild(script);
+
+      const timeout = setTimeout(() => reject(new Error('Timeout chargement noVNC')), 10000);
+      const poll = () => {
+        if ((window as any).RFB) {
+          clearTimeout(timeout);
+          resolve((window as any).RFB);
+        } else setTimeout(poll, 50);
+      };
+      poll();
+    });
+  }
+
   openConsole(vm: any, node: string = 'pve') {
     const nameKey = vm.name;
     const domId = this.sanitizeId(nameKey);
@@ -82,7 +113,7 @@ export class ShowVMComponent implements OnInit {
     });
   }
 
-  private connectNoVnc(nameKey: string, domId: string, wssUrl: string) {
+  private async connectNoVnc(nameKey: string, domId: string, wssUrl: string) {
     const container = document.getElementById(`vnc-${domId}`) as HTMLDivElement | null;
     if (!container) {
       this.loadingConsole[nameKey] = false;
@@ -90,7 +121,8 @@ export class ShowVMComponent implements OnInit {
     }
 
     try {
-      const rfb = new RFB(container, wssUrl, { repeaterID: '' });
+      const RFBClass: any = await this.ensureRfbAvailable();
+      const rfb = new RFBClass(container, wssUrl, { repeaterID: '' });
       rfb.viewOnly = false;
       rfb.scaleViewport = this.scaleViewport;
 
