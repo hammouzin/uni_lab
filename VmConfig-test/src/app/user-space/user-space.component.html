@@ -1,0 +1,53 @@
+<div class="d-flex" style="height: 100vh; background-color: #f0f2f5;"> <!-- fond très clair -->
+  
+  <nav style="width: 250px; background-color: #0d1b2a; color: #cbd5e1;" class="p-3">
+    <h4 class="text-center fw-bold" style="color: #e0e7ff;">Uni-Lab</h4>
+    <hr style="border-color: #334155;" />
+    <ul class="nav flex-column">
+      <li class="nav-item mb-2">
+        <a class="nav-link" routerLink="/user/dashboard/accueil" style="color: #cbd5e1;">🏠 Accueil</a>
+      </li>
+      <li class="nav-item mb-2">
+       <a class="nav-link" routerLink="/user/dashboard/vm" style="color: #cbd5e1;">🖥️ Gérer les VM</a>
+
+      </li>
+      <li class="nav-item mb-2">
+        <a class="nav-link" routerLink="/user/dashboard/cours" style="color: #cbd5e1;">📚 Cours</a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="flex-grow-1 d-flex flex-column" style="background-color: #ffffff;">
+    
+    <header style="background-color: #ffffff; color: #0f1219;" class="p-3 d-flex justify-content-between align-items-center border-bottom shadow-sm">
+      <h5></h5>
+
+      <!-- Menu profil simple -->
+      <div class="d-flex align-items-center">
+        <div class="me-3">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            alt="User Icon"
+            width="30"
+            height="30"
+            class="rounded-circle border"
+          />
+        </div>
+        
+        <!-- Bouton de déconnexion -->
+        <button 
+          class="btn btn-outline-danger btn-sm" 
+          (click)="logout()"
+          title="Se déconnecter"
+        >
+          🚪 Se déconnecter
+        </button>
+      </div>
+    </header>
+
+    <main class="p-4" style="background-color: #fefefe; flex-grow: 1; overflow-y: auto;">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+</div>

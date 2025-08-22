@@ -1,0 +1,32 @@
+<div class="container mt-5">
+ <div class="row justify-content-center">
+ <div class="col-md-6">
+ <div class="card">
+ <div class="card-body">
+ <h3 class="card-title text-center mb-4">S'inscrire</h3>
+ <p class="text-center">L'inscription fonctionne !</p>
+ <form [formGroup]="register" (ngSubmit)="handleSubmit()">
+ <div class="mb-3">
+ <label for="email" class="form-label">Email</label>
+ <input type="email" class="form-control" id="email" placeholder="Veuillez saisir votre email" formControlName="email">
+ </div>
+ <div class="mb-3">
+ <label for="name" class="form-label">Nom</label>
+ <input type="text" class="form-control" id="name" placeholder="Veuillez saisir votre nom" formControlName="name">
+ </div>
+ <div class="mb-3">
+ <label for="password" class="form-label">Mot de passe</label>
+ <input type="password" class="form-control" id="password" placeholder="Veuillez saisir votre mot de passe" formControlName="password">
+ </div>
+ <div class="d-grid">
+ <button type="submit" class="btn btn-primary">S'inscrire</button>
+ </div>
+ </form>
+ <div class="text-center mt-3">
+ <a routerLink="/login">Déjà inscrit ?</a>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>

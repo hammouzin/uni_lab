@@ -1,0 +1,111 @@
+<div class="card shadow-sm p-4 mb-4">
+  <h4 class="mb-3 text-primary">Nouvelle Machine Virtuelle</h4>
+  
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="vmForm" (ngSubmit)="createVM()" (input)="onFormChange()">
+    <div class="row mb-3">
+      <div class="col">
+        <label class="form-label">Nom *</label>
+        <input 
+          formControlName="name" 
+          class="form-control" 
+          placeholder="Nom de la VM"
+          [class.is-invalid]="vmForm.get('name')?.invalid && vmForm.get('name')?.touched"
+        >
+        <div *ngIf="vmForm.get('name')?.invalid && vmForm.get('name')?.touched" class="invalid-feedback">
+          <div *ngIf="vmForm.get('name')?.errors?.['required']">Le nom est requis.</div>
+          <div *ngIf="vmForm.get('name')?.errors?.['minlength']">Le nom doit contenir au moins 2 caractères.</div>
+        </div>
+      </div>
+      <div class="col">
+        <label class="form-label">Cœurs *</label>
+        <input 
+          type="number" 
+          formControlName="cores" 
+          class="form-control"
+          [class.is-invalid]="vmForm.get('cores')?.invalid && vmForm.get('cores')?.touched"
+        >
+        <div *ngIf="vmForm.get('cores')?.invalid && vmForm.get('cores')?.touched" class="invalid-feedback">
+          <div *ngIf="vmForm.get('cores')?.errors?.['required']">Le nombre de cœurs est requis.</div>
+          <div *ngIf="vmForm.get('cores')?.errors?.['min']">Minimum 1 cœur.</div>
+          <div *ngIf="vmForm.get('cores')?.errors?.['max']">Maximum 32 cœurs.</div>
+        </div>
+      </div>
+      <div class="col">
+        <label class="form-label">Sockets *</label>
+        <input 
+          type="number" 
+          formControlName="sockets" 
+          class="form-control"
+          [class.is-invalid]="vmForm.get('sockets')?.invalid && vmForm.get('sockets')?.touched"
+        >
+        <div *ngIf="vmForm.get('sockets')?.invalid && vmForm.get('sockets')?.touched" class="invalid-feedback">
+          <div *ngIf="vmForm.get('sockets')?.errors?.['required']">Le nombre de sockets est requis.</div>
+          <div *ngIf="vmForm.get('sockets')?.errors?.['min']">Minimum 1 socket.</div>
+          <div *ngIf="vmForm.get('sockets')?.errors?.['max']">Maximum 8 sockets.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col">
+        <label class="form-label">Mémoire (MB) *</label>
+        <input 
+          type="number" 
+          formControlName="memory" 
+          class="form-control"
+          [class.is-invalid]="vmForm.get('memory')?.invalid && vmForm.get('memory')?.touched"
+        >
+        <div *ngIf="vmForm.get('memory')?.invalid && vmForm.get('memory')?.touched" class="invalid-feedback">
+          <div *ngIf="vmForm.get('memory')?.errors?.['required']">La mémoire est requise.</div>
+          <div *ngIf="vmForm.get('memory')?.errors?.['min']">Minimum 512 MB.</div>
+          <div *ngIf="vmForm.get('memory')?.errors?.['max']">Maximum 32768 MB (32 GB).</div>
+        </div>
+      </div>
+      <div class="col">
+        <label class="form-label">Taille Disque (GB) *</label>
+        <input 
+          type="number" 
+          formControlName="diskSize" 
+          class="form-control"
+          [class.is-invalid]="vmForm.get('diskSize')?.invalid && vmForm.get('diskSize')?.touched"
+        >
+        <div *ngIf="vmForm.get('diskSize')?.invalid && vmForm.get('diskSize')?.touched" class="invalid-feedback">
+          <div *ngIf="vmForm.get('diskSize')?.errors?.['required']">La taille du disque est requise.</div>
+          <div *ngIf="vmForm.get('diskSize')?.errors?.['min']">Minimum 10 GB.</div>
+          <div *ngIf="vmForm.get('diskSize')?.errors?.['max']">Maximum 1000 GB.</div>
+        </div>
+      </div>
+      <div class="col">
+        <label class="form-label">ISO *</label>
+        <select 
+          formControlName="iso" 
+          class="form-select"
+          [class.is-invalid]="vmForm.get('iso')?.invalid && vmForm.get('iso')?.touched"
+        >
+          <option value="">Sélectionnez un ISO</option>
+          <option *ngFor="let iso of isoOptions" [value]="iso">{{ iso }}</option>
+        </select>
+        <div *ngIf="vmForm.get('iso')?.invalid && vmForm.get('iso')?.touched" class="invalid-feedback">
+          <div *ngIf="vmForm.get('iso')?.errors?.['required']">Veuillez sélectionner un ISO.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-end">
+      <button 
+        type="submit" 
+        class="btn btn-success" 
+        [disabled]="vmForm.invalid || isLoading"
+      >
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+        {{ isLoading ? 'Création en cours...' : '✅ Créer la VM' }}
+      </button>
+    </div>
+  </form>
+</div>
