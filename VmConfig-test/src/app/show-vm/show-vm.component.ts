@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ConsoleService } from '../services/console.service';
 
-declare var RFB: any; // Déclare RFB global chargé via le CDN
+declare var RFB: any;
 
 @Component({
   selector: 'app-show-vm',
