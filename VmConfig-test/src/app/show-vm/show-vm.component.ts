@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ConsoleService } from '../services/console.service';
-import RFB from '@novnc/novnc/lib/rfb.js';
+
+// declare global RFB provided via CDN
+declare var RFB: any;
 
 @Component({
   selector: 'app-show-vm',
