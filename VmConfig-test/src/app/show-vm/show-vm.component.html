@@ -41,7 +41,7 @@
 
   <tr *ngIf="showConsole[vm.name]">
     <td colspan="7">
-      <div id="vnc-{{ vm.name }}" style="width: 100%; height: 500px; border: 1px solid #ccc;"></div>
+      <div [id]="'vnc-' + sanitizeId(vm.name)" style="width: 100%; height: 500px; border: 1px solid #ccc;"></div>
       <button class="btn btn-sm btn-warning mt-2" (click)="closeConsole(vm)">❌ Fermer la console</button>
     </td>
   </tr>
