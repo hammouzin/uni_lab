@@ -1,0 +1,10 @@
+
+> vm-config-test@0.0.0 serve:ssr
+> node dist/VmConfig-test/server/main.js
+
+Node Express server listening on http://localhost:4000
+4 rules skipped due to selector errors:
+  .form-floating>~label -> Did not expect successive traversals.
+  .btn-group>+.btn -> Did not expect successive traversals.
+  .btn-group>+.btn -> Did not expect successive traversals.
+  .btn-group-vertical>+.btn -> Did not expect successive traversals.

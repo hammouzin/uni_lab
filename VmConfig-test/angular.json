@@ -23,7 +23,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/vm-config-test",
+            "outputPath": "dist/VmConfig-test/browser",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -102,6 +102,58 @@
               "src/styles.css"
             ]
           }
+        },
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/VmConfig-test/server",
+            "main": "src/server.ts",
+            "tsConfig": "tsconfig.server.json"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "media"
+            },
+            "development": {
+              "optimization": false,
+              "sourceMap": true,
+              "extractLicenses": false
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve-ssr": {
+          "builder": "@angular-devkit/build-angular:ssr-dev-server",
+          "configurations": {
+            "development": {
+              "browserTarget": "VmConfig-test:build:development",
+              "serverTarget": "VmConfig-test:server:development"
+            },
+            "production": {
+              "browserTarget": "VmConfig-test:build:production",
+              "serverTarget": "VmConfig-test:server:production"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "prerender": {
+          "builder": "@angular-devkit/build-angular:prerender",
+          "options": {
+            "routes": [
+              "/"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "VmConfig-test:build:production",
+              "serverTarget": "VmConfig-test:server:production"
+            },
+            "development": {
+              "browserTarget": "VmConfig-test:build:development",
+              "serverTarget": "VmConfig-test:server:development"
+            }
+          },
+          "defaultConfiguration": "production"
         }
       }
     }
