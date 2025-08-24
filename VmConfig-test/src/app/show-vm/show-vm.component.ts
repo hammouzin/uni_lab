@@ -2,8 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ConsoleService } from '../services/console.service';
 
-declare var RFB: any; // Déclare RFB global chargé via le CDN
-
 @Component({
   selector: 'app-show-vm',
   standalone: false,
@@ -56,49 +54,93 @@ export class ShowVMComponent implements OnInit {
     this.showAddVmForm = false;
   }
 
+  sanitizeId(value: string): string {
+    return (value ?? '')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, '-');
+  }
+
+  private ensureRfbAvailable(): Promise<any> {
+    const globalAny = window as any;
+    if (globalAny.RFB) return Promise.resolve(globalAny.RFB);
+
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-novnc-loader="true"]') as HTMLScriptElement | null;
+      if (existing) {
+        const check = () => {
+          if ((window as any).RFB) resolve((window as any).RFB);
+          else setTimeout(check, 50);
+        };
+        check();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.dataset['novncLoader'] = 'true';
+      script.textContent = "import RFB from 'https://unpkg.com/@novnc/novnc/core/rfb.js'; window.RFB = RFB;";
+      script.onload = () => resolve((window as any).RFB);
+      script.onerror = (e) => reject(e);
+      document.head.appendChild(script);
+
+      const timeout = setTimeout(() => reject(new Error('Timeout chargement noVNC')), 10000);
+      const poll = () => {
+        if ((window as any).RFB) {
+          clearTimeout(timeout);
+          resolve((window as any).RFB);
+        } else setTimeout(poll, 50);
+      };
+      poll();
+    });
+  }
+
   openConsole(vm: any, node: string = 'pve') {
-    const key = vm.name;
-    this.loadingConsole[key] = true;
+    const nameKey = vm.name;
+    const domId = this.sanitizeId(nameKey);
+    this.loadingConsole[nameKey] = true;
 
     this.consoleSvc.getWssUrlByName(node, vm.name).subscribe({
       next: ({ wssUrl }) => {
-        this.showConsole[key] = true;
-        setTimeout(() => this.connectNoVnc(key, wssUrl), 0);
+        this.showConsole[nameKey] = true;
+        setTimeout(() => this.connectNoVnc(nameKey, domId, wssUrl), 0);
       },
       error: (e) => {
         console.error('Erreur ouverture console', e);
-        this.loadingConsole[key] = false;
+        this.loadingConsole[nameKey] = false;
       }
     });
   }
 
-  private connectNoVnc(key: string, wssUrl: string) {
-  const container = document.getElementById(`vnc-${key}`) as HTMLDivElement | null;
-  if (!container) {
-    this.loadingConsole[key] = false;
-    return;
+  private async connectNoVnc(nameKey: string, domId: string, wssUrl: string) {
+    const container = document.getElementById(`vnc-${domId}`) as HTMLDivElement | null;
+    if (!container) {
+      this.loadingConsole[nameKey] = false;
+      return;
+    }
+
+    try {
+      const RFBClass: any = await this.ensureRfbAvailable();
+      const rfb = new RFBClass(container, wssUrl, { repeaterID: '' });
+      rfb.viewOnly = false;
+      rfb.scaleViewport = this.scaleViewport;
+
+      rfb.addEventListener('connect', () => this.loadingConsole[nameKey] = false);
+      rfb.addEventListener('disconnect', (ev: any) => {
+        console.error('Console déconnectée', ev?.detail);
+        this.showConsole[nameKey] = false;
+        this.loadingConsole[nameKey] = false;
+        this.rfbByVm[nameKey] = undefined;
+      });
+
+      this.rfbByVm[nameKey] = rfb;
+    } catch (err) {
+      console.error('Erreur noVNC', err);
+      this.loadingConsole[nameKey] = false;
+      this.showConsole[nameKey] = false;
+    }
   }
-
-  try {
-    const rfb = new RFB(container, wssUrl, { repeaterID: '' });
-    rfb.viewOnly = false;
-    rfb.scaleViewport = this.scaleViewport;
-
-    rfb.addEventListener('connect', () => this.loadingConsole[key] = false);
-    rfb.addEventListener('disconnect', (ev: any) => {
-      console.error('Console déconnectée', ev?.detail);
-      this.showConsole[key] = false;
-      this.loadingConsole[key] = false;
-      this.rfbByVm[key] = undefined;
-    });
-
-    this.rfbByVm[key] = rfb;
-  } catch (err) {
-    console.error('Erreur noVNC', err);
-    this.loadingConsole[key] = false;
-    this.showConsole[key] = false;
-  }
-}
 
   toggleScale(vm: any) {
     this.scaleViewport = !this.scaleViewport;
